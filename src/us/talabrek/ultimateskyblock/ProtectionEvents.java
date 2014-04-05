@@ -2,6 +2,7 @@ package us.talabrek.ultimateskyblock;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -11,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -44,7 +46,7 @@ public class ProtectionEvents implements Listener {
 
 		if (!(event.getDamager() instanceof Player) && !(event.getDamager() instanceof Projectile))
 			return;
-		
+
 		if (event.getEntity() instanceof Player)
 			return;
 
@@ -61,7 +63,7 @@ public class ProtectionEvents implements Listener {
 
 		if (damager == null)
 			return;
-		
+
 		if (damager.hasPermission("usb.mod.bypassprotection"))
 			return;
 
@@ -214,5 +216,27 @@ public class ProtectionEvents implements Listener {
 				event.getPlayer().sendMessage(ChatColor.RED + "Splash potions are disabled when not on your island!");
 			}
 		}
+	}
+
+	@EventHandler
+	public void onEntityInteract(EntityInteractEvent event) {
+		if (!(event.getEntity() instanceof Arrow))
+			return;
+
+		Arrow arrow = (Arrow) event.getEntity();
+
+		if (!(arrow.getShooter() instanceof Player))
+			return;
+
+		Player damager = (Player) arrow.getShooter();
+		
+		if (damager == null)
+			return;
+
+		if (damager.hasPermission("usb.mod.bypassprotection"))
+			return;
+
+		if (!uSkyBlock.getInstance().playerIsOnIsland(damager))
+			event.setCancelled(true);
 	}
 }
