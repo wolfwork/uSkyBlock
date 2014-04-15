@@ -120,9 +120,9 @@ public class IslandKickCommand implements ICommand {
 			}
 			
 			if (!other.getPartyLeader().equals(sender.getName())){
- +				sender.sendMessage(ChatColor.RED + args[0] + " is not a member of your party!");
- +				return true;
- +			}
+				sender.sendMessage(ChatColor.RED + args[0] + " is not a member of your party!");
+				return true;
+			}
 			
 		}
 
