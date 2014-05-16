@@ -9,30 +9,36 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 public class PlayerInfo implements Serializable {
 	private static final long serialVersionUID = 1L;
-	private HashMap<String, Boolean> challengeList;
-	private String deathWorld;
+	private String playerName;
 	private boolean hasIsland;
 	private boolean hasParty;
+	private boolean warpActive;
+	private List<String> members;
+	private List<String> banned;
+	private String partyLeader;
+	private String partyIslandLocation;
+	private String islandLocation;
 	private String homeLocation;
+	private String warpLocation;
+	private String deathWorld;
+	private HashMap<String, Boolean> challengeList;
 	private float islandExp;
 	private int islandLevel;
-	private String islandLocation;
-	private List<String> members;
-	private String partyIslandLocation;
-	private String partyLeader;
-	private String playerName;
 
 	public PlayerInfo(final String playerName) {
 		this.playerName = playerName;
 		members = new ArrayList<String>();
+		banned = new ArrayList<String>();
 		hasIsland = false;
-
+		warpActive = false;
 		islandLocation = null;
 		homeLocation = null;
+		warpLocation = null;
 		deathWorld = null;
 		hasParty = false;
 		partyLeader = null;
@@ -42,8 +48,85 @@ public class PlayerInfo implements Serializable {
 		islandLevel = 0;
 	}
 
+	public void startNewIsland(Location l) {
+		hasIsland = true;
+		setIslandLocation(l);
+		islandLevel = 0;
+		islandExp = 0.0F;
+		partyIslandLocation = null;
+		partyLeader = null;
+		hasParty = false;
+		homeLocation = null;
+		warpLocation = null;
+		warpActive = false;
+		members = new ArrayList<String>();
+	}
+
+	public void removeFromIsland() {
+		hasIsland = false;
+		setIslandLocation(null);
+		islandLevel = 0;
+		islandExp = 0.0F;
+		partyIslandLocation = null;
+		partyLeader = null;
+		hasParty = false;
+		homeLocation = null;
+		warpLocation = null;
+		warpActive = false;
+		members = new ArrayList<String>();
+	}
+
+	public void toggleWarpActive() {
+		if (!this.warpActive)
+			warpActive = true;
+		else
+			warpActive = false;
+	}
+
+	public void warpOn() {
+		warpActive = true;
+	}
+
+	public void warpOff() {
+		warpActive = true;
+	}
+
+	public boolean isWarpActive() {
+		return warpActive;
+	}
+
+	public void setWarpLocation(Location l) {
+		warpLocation = getStringLocation(l);
+	}
+
+	public Location getWarpLocation() {
+		return getLocationString(warpLocation);
+	}
+
+	public List<String> getBanned() {
+		if (banned == null)
+			banned = new ArrayList<String>();
+		return banned;
+	}
+
+	public void addBan(String player) {
+		getBanned().add(player);
+	}
+
+	public void removeBan(String player) {
+		getBanned().remove(player);
+	}
+
+	public boolean isBanned(String player) {
+		return getBanned().contains(player);
+	}
+
 	public void addMember(final String member) {
 		members.add(member);
+	}
+
+	public void clearChallenges() {
+		challengeList.clear();
 	}
 
 	public void buildChallengeList() {
@@ -68,12 +151,16 @@ public class PlayerInfo implements Serializable {
 	}
 
 	public boolean challengeExists(final String challenge) {
-		if (challengeList.containsKey(challenge.toLowerCase())) { return true; }
+		if (challengeList.containsKey(challenge.toLowerCase())) {
+			return true;
+		}
 		return false;
 	}
 
 	public boolean checkChallenge(final String challenge) {
-		if (challengeList.containsKey(challenge.toLowerCase())) { return challengeList.get(challenge.toLowerCase()).booleanValue(); }
+		if (challengeList.containsKey(challenge.toLowerCase())) {
+			return challengeList.get(challenge.toLowerCase()).booleanValue();
+		}
 
 		return false;
 	}
@@ -126,7 +213,9 @@ public class PlayerInfo implements Serializable {
 	}
 
 	private Location getLocationString(final String s) {
-		if (s == null || s.trim() == "") { return null; }
+		if (s == null || s.trim() == "") {
+			return null;
+		}
 		final String[] parts = s.split(":");
 		if (parts.length == 4) {
 			final World w = Bukkit.getServer().getWorld(parts[0]);
@@ -151,7 +240,7 @@ public class PlayerInfo implements Serializable {
 	}
 
 	public Player getPlayer() {
-		return Bukkit.getPlayer(playerName);
+		return Bukkit.getPlayerExact(playerName);
 	}
 
 	public String getPlayerName() {
@@ -159,7 +248,9 @@ public class PlayerInfo implements Serializable {
 	}
 
 	private String getStringLocation(final Location l) {
-		if (l == null) { return ""; }
+		if (l == null) {
+			return "";
+		}
 		return l.getWorld().getName() + ":" + l.getBlockX() + ":" + l.getBlockY() + ":" + l.getBlockZ();
 	}
 
@@ -244,5 +335,174 @@ public class PlayerInfo implements Serializable {
 
 	public void setPlayerName(final String s) {
 		playerName = s;
+	}
+
+	public Location getTeleportLocation() {
+		Location target = getHomeLocation();
+		if (target == null) {
+			if (getIslandLocation() == null && getHasParty())
+				target = getPartyIslandLocation();
+			else if (getIslandLocation() != null)
+				target = getIslandLocation();
+		}
+
+		return target;
+	}
+
+	public boolean teleportHome(Player player) {
+		Location target = getTeleportLocation();
+
+		if (target == null)
+			return false;
+
+		if (getHomeLocation() == null)
+			setHomeLocation(target);
+
+		if (Misc.safeTeleport(player, target)) {
+			uSkyBlock.getInstance().removeCreatures(target);
+			return true;
+		} else {
+			player.teleport(target);
+		}
+
+		return false;
+	}
+
+	public boolean teleportWarp(Player player) {
+		Location target = getWarpLocation();
+
+		if (target == null) {
+			if (getIslandLocation() == null && getHasParty())
+				target = getPartyIslandLocation();
+			else
+				target = getIslandLocation();
+		}
+
+		if (target == null)
+			return false;
+
+		if (Misc.safeTeleport(player, target)) {
+			uSkyBlock.getInstance().removeCreatures(target);
+			return true;
+		}
+
+		return false;
+	}
+
+	public void recalculateLevel(final Runnable callback) {
+		uSkyBlock.getInstance().getServer().getScheduler().runTask(uSkyBlock.getInstance(), new Runnable() {
+			public void run() {
+
+				try {
+					Location loc;
+					if (getHasParty())
+						loc = getPartyIslandLocation();
+					else
+						loc = getIslandLocation();
+
+					if (loc != null) {
+						int blockCount = 0;
+						int cobbleCount = 0;
+						int endCount = 0;
+						int px = loc.getBlockX();
+						int py = loc.getBlockY();
+						int pz = loc.getBlockZ();
+						int radius = (Settings.island_distance / 2);
+						for (int x = -radius; x <= radius; ++x) {
+							for (int y = 0; y <= 255; ++y) {
+								for (int z = -radius; z <= radius; ++z) {
+									Block b = loc.getWorld().getBlockAt(px + x, py + y, pz + z);
+									switch (b.getType()) {
+										case DIAMOND_BLOCK:
+										case EMERALD_BLOCK:
+										case BEACON:
+										case DRAGON_EGG:
+											blockCount += 300;
+										break;
+										case GOLD_BLOCK:
+										case ENCHANTMENT_TABLE:
+											blockCount += 150;
+										break;
+										case OBSIDIAN:
+										case IRON_BLOCK:
+										case REDSTONE_BLOCK:
+											blockCount += 10;
+										break;
+										case BOOKSHELF:
+										case JUKEBOX:
+										case HARD_CLAY:
+										case STAINED_CLAY:
+											blockCount += 5;
+										break;
+										case ICE:
+										case CLAY:
+										case NETHER_BRICK:
+										case GRASS:
+										case MYCEL:
+										case GLOWSTONE:
+										case NETHER_BRICK_STAIRS:
+										case QUARTZ_BLOCK:
+										case QUARTZ_STAIRS:
+											blockCount += 3;
+										break;
+										case SMOOTH_BRICK:
+										case BRICK:
+										case WOOL:
+										case SANDSTONE:
+										case BRICK_STAIRS:
+										case SMOOTH_STAIRS:
+										case DOUBLE_STEP:
+										case GLASS:
+											blockCount += 2;
+										break;
+										case COBBLESTONE:
+											if (cobbleCount < 10000) {
+												++cobbleCount;
+												++blockCount;
+											}
+										break;
+										case ENDER_STONE:
+											if (endCount < 10000) {
+												++endCount;
+												++blockCount;
+											}
+										break;
+
+										// 0 pointers
+										case WATER:
+										case STATIONARY_WATER:
+										case LAVA:
+										case STATIONARY_LAVA:
+										case AIR:
+										break;
+
+										default:
+											++blockCount;
+										break;
+									}
+								}
+							}
+						}
+						setIslandLevel(blockCount / 100);
+					}
+				} catch (Exception e) {
+					uSkyBlock.getLog().severe("Error while calculating island level");
+					e.printStackTrace();
+				}
+
+				Bukkit.getScheduler().scheduleSyncDelayedTask(uSkyBlock.getInstance(), new Runnable() {
+					public void run() {
+						uSkyBlock.getInstance().updateTopIsland(PlayerInfo.this);
+					}
+				}, 0L);
+
+				if (callback != null)
+					Bukkit.getScheduler().runTask(uSkyBlock.getInstance(), callback);
+			}
+		});
+	}
+
+	public void save() {
+		uSkyBlock.getInstance().savePlayer(this);
 	}
 }
