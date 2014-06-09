@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
-import us.talabrek.ultimateskyblock.PlayerInfo;
+import us.talabrek.ultimateskyblock.UUIDPlayerInfo;
 import us.talabrek.ultimateskyblock.uSkyBlock;
 
 public class Purger implements Runnable
@@ -27,16 +27,16 @@ public class Purger implements Runnable
 
 		uSkyBlock.getLog().info("Preparing list of islands to purge.");
 		
-		LinkedList<PlayerInfo> toRemove = new LinkedList<PlayerInfo>();
+		LinkedList<UUIDPlayerInfo> toRemove = new LinkedList<UUIDPlayerInfo>();
 
 		for (File child : directoryPlayers.listFiles()) 
 		{
 			OfflinePlayer player = Bukkit.getOfflinePlayer(child.getName());
 			if(player.hasPlayedBefore() && !player.isOnline())
 			{
-				if (player.getLastPlayed() < mEarliest || (mNoIsland && !uSkyBlock.getInstance().hasIsland(player.getName()))) 
+				if (player.getLastPlayed() < mEarliest || (mNoIsland && !uSkyBlock.getInstance().hasIsland(player.getUniqueId())))
 				{
-					PlayerInfo pi = uSkyBlock.getInstance().getPlayerNoStore(player.getName());
+					UUIDPlayerInfo pi = uSkyBlock.getInstance().getPlayerNoStore(player.getUniqueId());
 					if (pi != null && (mNoIsland || pi.getHasIsland())) 
 						toRemove.add(pi);
 				}

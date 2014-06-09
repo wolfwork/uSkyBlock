@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import us.talabrek.ultimateskyblock.ICommand;
-import us.talabrek.ultimateskyblock.PlayerInfo;
+import us.talabrek.ultimateskyblock.UUIDPlayerInfo;
 import us.talabrek.ultimateskyblock.uSkyBlock;
 
 public class IslandBanCommand implements ICommand {
@@ -55,7 +55,7 @@ public class IslandBanCommand implements ICommand {
 		if (args.length > 1)
 			return false;
 
-		PlayerInfo info = uSkyBlock.getInstance().getPlayer(sender.getName());
+		UUIDPlayerInfo info = uSkyBlock.getInstance().getPlayer(((Player)sender).getUniqueId());
 
 		if (info == null) {
 			sender.sendMessage(ChatColor.RED + "You have not started skyblock. Please use " + ChatColor.YELLOW + "/island" + ChatColor.RED + " to begin");
@@ -77,11 +77,11 @@ public class IslandBanCommand implements ICommand {
 				return true;
 			}
 
-			if (info.isBanned(player.getName())) {
-				info.removeBan(player.getName());
+			if (info.isBanned(player.getUniqueId())) {
+				info.removeBan(player.getUniqueId());
 				sender.sendMessage(ChatColor.YELLOW + "You have unbanned " + ChatColor.GREEN + player.getName() + ChatColor.YELLOW + " from warping to your island.");
 			} else {
-				info.addBan(player.getName());
+				info.addBan(player.getUniqueId());
 				sender.sendMessage(ChatColor.YELLOW + "You have banned " + ChatColor.RED + player.getName() + ChatColor.YELLOW + " from warping to your island.");
 			}
 		}
