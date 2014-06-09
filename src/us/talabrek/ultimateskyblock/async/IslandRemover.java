@@ -62,45 +62,45 @@ public class IslandRemover extends QueueTask
 		{
 			ok = uSkyBlock.getInstance().deletePlayerData(island.getPlayerUUID());
 		}
-		else
+		else {
 			removed = ok = remove(island);
-		
-		if(!ok)
+    }
+		if(!ok) {
 			++mFailCount;
-		
+		}
 		if(!mNext.hasNext())
 		{
 			doNext();
 			
-			if(mFailCount > 0)
+			if(mFailCount > 0) {
 				uSkyBlock.getLog().info("Island removal finished. " + mFailCount + " islands failed");
-			else
+      }
+      else {
 				uSkyBlock.getLog().info("Island removal finished.");
+      }
 		}
-		else
+		else {
 			Bukkit.getScheduler().runTaskLater(uSkyBlock.getInstance(), this, (removed ? 20L : 4L));
+    }
 	}
 	
 	private boolean remove(UUIDPlayerInfo island)
 	{
 		Location center = island.getIslandLocation();
 		
-		if(island.getHasParty() && island.getPlayerUUID().equals(island.getPartyLeader()))
+		if(island.getHasParty() && island.getPlayerUUID().equals(island.getPartyLeader())) {
 			center = island.getPartyIslandLocation();
-		
-		if(center == null)
+		}
+		if(center == null) {
 			return false;
-		
-		for (int x = center.getBlockX() - Settings.island_protectionRange / 2; x <= center.getBlockX() + Settings.island_protectionRange / 2; x++) 
-		{
-			for (int z = center.getBlockZ() - Settings.island_protectionRange / 2; z <= center.getBlockZ() + Settings.island_protectionRange / 2; z++) 
-			{
-				for (int y = 0; y <= 255; y++) 
-				{
+		}
+		for (int x = center.getBlockX() - Settings.island_protectionRange / 2; x <= center.getBlockX() + Settings.island_protectionRange / 2; x++) {
+			for (int z = center.getBlockZ() - Settings.island_protectionRange / 2; z <= center.getBlockZ() + Settings.island_protectionRange / 2; z++) {
+				for (int y = 0; y <= 255; y++) {
 					Block block = new Location(center.getWorld(), x, y, z).getBlock();
-					if(block.getType() == Material.AIR)
+					if(block.getType() == Material.AIR) {
 						continue;
-					
+          }
 					if(block.getType() == Material.CHEST || block.getType() == Material.TRAPPED_CHEST || 
 						block.getType() == Material.DISPENSER || block.getType() == Material.DROPPER || 
 						block.getType() == Material.FURNACE || block.getType() == Material.BREWING_STAND)

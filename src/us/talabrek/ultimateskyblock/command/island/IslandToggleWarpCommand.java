@@ -28,7 +28,7 @@ public class IslandToggleWarpCommand implements ICommand
 	@Override
 	public String getPermission()
 	{
-		return "usb.extra.addwarp";
+		return "usb.island.addwarp";
 	}
 
 	@Override

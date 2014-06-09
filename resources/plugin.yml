@@ -4,8 +4,7 @@ version: ${pom.version}
 description: Ultimate SkyBlock.
 author: Talabrek (based on code by Qgel and others)
 load: STARTUP
-
-depend: [Vault]
+depend: [Vault, WorldGuard, WorldEdit]
 
 commands:
     island:
@@ -41,8 +40,12 @@ permissions:
             description: Let the player set their island teleport point
           usb.island.challenges:
             description: Let the player use the /challenges command
+          usb.island.lock:
+            description: Let the player use /island lock and unlock commands to open and close an island.
           usb.island.warp:
             description: Let the player use /island warp to warp to an open island.
+          usb.island.addwarp:
+            description: The player can open his island, allowing other players to warp there.
           usb.island.warp.override:
             description: Let the player use /island warpo to warp to an island regardless of warp settings.
             default: op
@@ -54,8 +57,6 @@ permissions:
             description: The player won't lose hunger on their island.
           usb.extra.partysize:
             description: The player can have double the party members on their island
-          usb.extra.addwarp:
-            description: The player can open his island, allowing other players to warp there.
       usb.party.*:
         children:
           usb.party.create:

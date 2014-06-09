@@ -56,24 +56,23 @@ public class IslandKickCommand implements ICommand {
             Player onlinePlayer = (Player)offlinePlayer;
             onlinePlayer.sendMessage(ChatColor.RED + "You have been kicked from " + owner.getPlayer().getName() + "'s skyblock.");
 			if (uSkyBlock.isSkyBlockWorld(onlinePlayer.getWorld())) {
-
-				if (Settings.extras_sendToSpawn)
+				if (Settings.extras_sendToSpawn) {
 					Misc.safeTeleport(onlinePlayer, Bukkit.getWorld("spawnworld").getSpawnLocation());
-				else
-					Misc.safeTeleport(onlinePlayer, uSkyBlock.getSkyBlockWorld().getSpawnLocation());
+				}
+        else {
+				  Misc.safeTeleport(onlinePlayer, uSkyBlock.getSkyBlockWorld().getSpawnLocation());
+        }
 			}
 		}
-
 		sender.sendMessage(ChatColor.GREEN + player.getPlayer().getName() + " has been removed from the island.");
-
 		player.setLeaveParty();
 		player.setHomeLocation(null);
 
 		owner.getMembers().remove(player.getPlayerUUID());
 
-		if (Settings.island_protectWithWorldGuard && Bukkit.getPluginManager().isPluginEnabled("WorldGuard"))
+		if (Settings.island_protectWithWorldGuard && Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
 			WorldGuardHandler.removePlayerFromRegion(owner.getPlayer().getName(), player.getPlayer().getName());
-
+    }
 		player.save();
 	}
 
@@ -98,9 +97,10 @@ public class IslandKickCommand implements ICommand {
 
 		UUIDPlayerInfo other = null;
 
-		if (args[0].equalsIgnoreCase("all"))
+		if (args[0].equalsIgnoreCase("all")) {
 			all = true;
-		else {
+    }  
+    else {
 			other = Misc.getPlayerInfo(args[0]);
 			if (other == null) {
 				sender.sendMessage(ChatColor.RED + "Unknown player " + args[0]);
@@ -111,23 +111,17 @@ public class IslandKickCommand implements ICommand {
 				sender.sendMessage(ChatColor.RED + "You cannot kick yourself.");
 				return true;
 			}
-<<<<<<< HEAD
-			
-			if (!other.getPartyLeader().equals(sender.getName())){
-				sender.sendMessage(ChatColor.RED + args[0] + " is not a member of your party!");
-				return true;
-			}
-			
-=======
 
             if (other.getPlayer().getPlayer() != null &&
                     uSkyBlock.isSkyBlockWorld(other.getPlayer().getPlayer().getWorld()) &&
                     other.getPlayer().getPlayer().getLocation().distance(info.getIslandLocation()) < Settings.island_distance) {
                 // if player, regardless of party, is on the owner's island, send to spawn
-                if (Settings.extras_sendToSpawn)
+                if (Settings.extras_sendToSpawn) {
                     Misc.safeTeleport(other.getPlayer().getPlayer(), Bukkit.getWorld("spawnworld").getSpawnLocation());
-                else
+                }
+                else {
                     Misc.safeTeleport(other.getPlayer().getPlayer(), uSkyBlock.getSkyBlockWorld().getSpawnLocation());
+                }
             }
 
 			// todo: check if other party leader exists
@@ -136,7 +130,6 @@ public class IslandKickCommand implements ICommand {
 				return true;
 			}
 
->>>>>>> uSkyblock/master
 		}
 
         if (!info.getPartyLeader().equals(((Player) sender).getUniqueId())) {
@@ -147,21 +140,21 @@ public class IslandKickCommand implements ICommand {
 		if (all) {
 			ArrayList<UUID> members = new ArrayList<UUID>(info.getMembers());
 			for (UUID member : members) {
-				if (member.equals(((Player)sender).getUniqueId()))
+				if (member.equals(((Player)sender).getUniqueId())) {
 					continue;
-
+        }
 				other = uSkyBlock.getInstance().getPlayer(member);
 
 				removePlayer(other, info, sender);
 			}
-		} else
+		}
+    else {
 			removePlayer(other, info, sender);
-
-		if (info.getMembers().isEmpty() || (info.getMembers().size() == 1 && info.getMembers().contains(info.getPlayerUUID())))
+    }
+		if (info.getMembers().isEmpty() || (info.getMembers().size() == 1 && info.getMembers().contains(info.getPlayerUUID()))) {
 			info.setLeaveParty();
-
+    }
 		info.save();
-
 		return true;
 	}
 
@@ -175,10 +168,9 @@ public class IslandKickCommand implements ICommand {
 						players.add(player.getName());
 				}
 			}
-
-			if ("all".startsWith(args[0].toLowerCase()))
+			if ("all".startsWith(args[0].toLowerCase())) {
 				players.add("all");
-
+      }
 			return players;
 		}
 		// TODO Auto-generated method stub

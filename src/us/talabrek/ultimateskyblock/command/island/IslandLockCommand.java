@@ -25,7 +25,7 @@ public class IslandLockCommand implements ICommand
 	@Override
 	public String getPermission()
 	{
-		return "usb.lock";
+		return "usb.island.lock";
 	}
 
 	@Override

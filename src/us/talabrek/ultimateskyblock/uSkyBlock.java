@@ -21,6 +21,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
+import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.MemorySection;
@@ -651,7 +652,7 @@ public class uSkyBlock extends JavaPlugin {
 
 		for (final String s : permList) {
 			if (!s.equalsIgnoreCase("none")) {
-				if (!VaultHandler.checkPerk(player, s, player.getWorld())) {
+				if (!VaultHandler.checkPerk(player.getName(), s, player.getWorld())) {
 					VaultHandler.addPerk(player, s);
 				}
 			}
@@ -1220,6 +1221,39 @@ public class uSkyBlock extends JavaPlugin {
 
 	}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	public boolean onInfoCooldown(final UUID playerUUID) {
 		if (infoCooldown.containsKey(playerUUID)) {
 			if (infoCooldown.get(playerUUID).longValue() > Calendar.getInstance().getTimeInMillis()) {
@@ -1319,10 +1353,10 @@ public class uSkyBlock extends JavaPlugin {
 		final PluginManager manager = getServer().getPluginManager();
 
 		manager.registerEvents(new PlayerJoin(), this);
-		// if (!Settings.island_protectWithWorldGuard) {
+		if (!Settings.island_protectWithWorldGuard) {
 		System.out.println("uSkyblock " + "[uSkyBlock] Using built in protection.");
 		manager.registerEvents(new ProtectionEvents(), getInstance());
-		// }
+		}
 	}
 
 	public void reloadData() {
