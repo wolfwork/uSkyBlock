@@ -1,6 +1,8 @@
 package us.talabrek.ultimateskyblock;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -77,7 +79,7 @@ public class DevCommand implements CommandExecutor {
 		sender.sendMessage(ChatColor.GOLD + Settings.challenges_ranks[0] + ": " + uSkyBlock.getInstance().getChallengesFromRank(player, Settings.challenges_ranks[0]));
 		for (int i = 1; i < Settings.challenges_ranks.length; i++) 
 		{
-			int rankComplete = uSkyBlock.getInstance().checkRankCompletion(player, Settings.challenges_ranks[i - 1]);
+			int rankComplete = uSkyBlock.getInstance().checkRankCompletion(player.getUniqueId(), Settings.challenges_ranks[i - 1]);
 			if (rankComplete <= 0)
 				sender.sendMessage(ChatColor.GOLD + Settings.challenges_ranks[i] + ": " + uSkyBlock.getInstance().getChallengesFromRank(player, Settings.challenges_ranks[i]));
 		}
@@ -96,7 +98,7 @@ public class DevCommand implements CommandExecutor {
 			}
 		}
 		
-		PlayerInfo pi = uSkyBlock.getInstance().getPlayer(player.getName());
+		UUIDPlayerInfo pi = uSkyBlock.getInstance().getPlayer(player.getUniqueId());
 		
 		if(pi == null)
 		{
@@ -118,7 +120,7 @@ public class DevCommand implements CommandExecutor {
 				return true;
 			}
 			
-			PlayerInfo info = uSkyBlock.getInstance().getPlayer(player.getName());
+			UUIDPlayerInfo info = uSkyBlock.getInstance().getPlayer(player.getUniqueId());
 			if(info != null)
 			{
 				final Location target = info.getTeleportLocation();
@@ -152,7 +154,7 @@ public class DevCommand implements CommandExecutor {
 			if (pi.getIslandLocation() != null) 
 			{
 				sender.sendMessage(ChatColor.YELLOW + "Removing " + player.getName() + "'s island.");
-				uSkyBlock.getInstance().devDeletePlayerIsland(player.getName());
+				uSkyBlock.getInstance().devDeletePlayerIsland(player.getUniqueId());
 			}
 			else
 				sender.sendMessage("Error: That player does not have an island!");
@@ -188,9 +190,9 @@ public class DevCommand implements CommandExecutor {
 			}
 			
 			if (pi.getHasIsland())
-				uSkyBlock.getInstance().devDeletePlayerIsland(player.getName());
+				uSkyBlock.getInstance().devDeletePlayerIsland(player.getUniqueId());
 			
-			if (uSkyBlock.getInstance().devSetPlayerIsland(sender, ((Player)player).getLocation(), player.getName()))
+			if (uSkyBlock.getInstance().devSetPlayerIsland(sender, ((Player)sender).getLocation(), player.getUniqueId()))
 				sender.sendMessage(ChatColor.GREEN + "Set " + player.getName() + "'s island to the bedrock nearest you.");
 			else
 				sender.sendMessage(ChatColor.RED + "Bedrock not found: unable to set the island!");
@@ -205,17 +207,25 @@ public class DevCommand implements CommandExecutor {
 			
 			if (pi.getHasParty()) 
 			{
-				final PlayerInfo piL = uSkyBlock.getInstance().getPlayer(pi.getPartyLeader());
-				final List<String> pList = piL.getMembers();
-				if (pList.contains(player.getName())) 
+				final UUIDPlayerInfo piL = uSkyBlock.getInstance().getPlayer(pi.getPartyLeader());
+				final List<UUID> pList = piL.getMembers();
+				if (pList.contains(player.getUniqueId()))
 				{
-					if (player.getName().equalsIgnoreCase(pi.getPartyLeader()))
-						pList.remove(player.getName());
+					if (player.getUniqueId().equals(pi.getPartyLeader()))
+						pList.remove(player.getUniqueId());
 					else
 						pList.remove(pi.getPartyLeader());
 					
 				}
-				sender.sendMessage(ChatColor.GREEN + pi.getPartyLeader() + " " + ChatColor.WHITE + pList.toString());
+
+				final List<String> pListStrings = new ArrayList<String>();
+				for (UUID uuid : pList) {
+                    System.out.println("Party members: " + uuid.toString());
+					pListStrings.add(Bukkit.getOfflinePlayer(uuid).getName());
+				}
+
+				sender.sendMessage(ChatColor.GREEN + Bukkit.getOfflinePlayer(pi.getPartyLeader()).getName()
+						+ " " + ChatColor.WHITE + pListStrings.toString());
 				sender.sendMessage(ChatColor.YELLOW + "Island Location:" + ChatColor.WHITE + " ("
 						+ pi.getPartyIslandLocation().getBlockX() + "," + pi.getPartyIslandLocation().getBlockY() + ","
 						+ pi.getPartyIslandLocation().getBlockZ() + ")");
@@ -230,9 +240,9 @@ public class DevCommand implements CommandExecutor {
 							+ pi.getIslandLocation().getBlockZ() + ")");
 				}
 				if (pi.getPartyLeader() != null)
-					sender.sendMessage(ChatColor.RED + "Party leader: " + pi.getPartyLeader() + " should be null!");
+					sender.sendMessage(ChatColor.RED + "Party leader: " + Bukkit.getOfflinePlayer(pi.getPartyLeader()).getName() + " should be null!");
 				
-				if (pi.getMembers() != null)
+				if (!pi.getMembers().isEmpty())
 					sender.sendMessage(ChatColor.RED + "Player has party members, but shouldn't!");
 				
 			}
@@ -279,6 +289,7 @@ public class DevCommand implements CommandExecutor {
 				}
 				catch(IllegalStateException e)
 				{
+					e.printStackTrace();
 					sender.sendMessage(ChatColor.RED + "Unable to comply. A problem with WorldGuard occurred.");
 				}
 			} 
@@ -430,7 +441,7 @@ public class DevCommand implements CommandExecutor {
 				}
 			}
 			
-			PlayerInfo pi = uSkyBlock.getInstance().getPlayer(player.getName());
+			UUIDPlayerInfo pi = uSkyBlock.getInstance().getPlayer(player.getUniqueId());
 			
 			if(pi == null)
 			{

@@ -9,11 +9,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import us.talabrek.ultimateskyblock.ICommand;
-import us.talabrek.ultimateskyblock.Misc;
-import us.talabrek.ultimateskyblock.PlayerInfo;
-import us.talabrek.ultimateskyblock.VaultHandler;
-import us.talabrek.ultimateskyblock.uSkyBlock;
+import us.talabrek.ultimateskyblock.*;
 
 public class IslandLevelCommand implements ICommand
 {
@@ -85,12 +81,12 @@ public class IslandLevelCommand implements ICommand
 			return true;
 		}
 		
-		PlayerInfo info = null;
+		UUIDPlayerInfo info = null;
 		
 		if(args.length == 1)
 			info = Misc.getPlayerInfo(args[0]);
 		else
-			info = uSkyBlock.getInstance().getPlayer(sender.getName());
+			info = uSkyBlock.getInstance().getPlayer(((Player)sender).getUniqueId());
 		
 		if(info == null)
 			sender.sendMessage(ChatColor.RED + "Unknown player: " + args[0]);
@@ -99,20 +95,20 @@ public class IslandLevelCommand implements ICommand
 			if (info.getHasParty() || info.getHasIsland())
 			{
 				mBlockedSenders.add(sender);
-				final PlayerInfo fInfo = info;
+				final UUIDPlayerInfo fInfo = info;
 				info.recalculateLevel(new Runnable()
 				{
 					@Override
 					public void run()
 					{
-						sender.sendMessage(ChatColor.YELLOW + "Information about " + fInfo.getPlayerName() + "'s Island:");
+						sender.sendMessage(ChatColor.YELLOW + "Information about " + fInfo.getPlayer().getName() + "'s Island:");
 						sender.sendMessage(ChatColor.GREEN + " Level: " + ChatColor.YELLOW + fInfo.getIslandLevel());
 						mBlockedSenders.remove(sender);
 					}
 				});
 			}
 			else
-				sender.sendMessage(ChatColor.RED + info.getPlayerName() + " does not have an island to rank.");
+				sender.sendMessage(ChatColor.RED + info.getPlayer().getName() + " does not have an island to rank.");
 		}
 		
 		return true;

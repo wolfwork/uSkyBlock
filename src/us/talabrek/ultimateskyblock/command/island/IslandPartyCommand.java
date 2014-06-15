@@ -2,20 +2,15 @@ package us.talabrek.ultimateskyblock.command.island;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import us.talabrek.ultimateskyblock.ICommand;
-import us.talabrek.ultimateskyblock.InviteHandler;
+import us.talabrek.ultimateskyblock.*;
 import us.talabrek.ultimateskyblock.InviteHandler.Invite;
-import us.talabrek.ultimateskyblock.Misc;
-import us.talabrek.ultimateskyblock.PlayerInfo;
-import us.talabrek.ultimateskyblock.Settings;
-import us.talabrek.ultimateskyblock.VaultHandler;
-import us.talabrek.ultimateskyblock.uSkyBlock;
 
 public class IslandPartyCommand implements ICommand
 {
@@ -79,7 +74,7 @@ public class IslandPartyCommand implements ICommand
 				return false;
 		}
 		
-		PlayerInfo info = null;
+		UUIDPlayerInfo info = null;
 		
 		if(args.length == 1)
 		{
@@ -93,7 +88,7 @@ public class IslandPartyCommand implements ICommand
 		}
 		else
 		{
-			info = uSkyBlock.getInstance().getPlayer(sender.getName());
+			info = uSkyBlock.getInstance().getPlayer(((Player)sender).getUniqueId());
 			
 			if(info == null)
 			{
@@ -127,8 +122,11 @@ public class IslandPartyCommand implements ICommand
             }
 
             sender.sendMessage(ChatColor.YELLOW + "Listing your island members:");
-            PlayerInfo leader = uSkyBlock.getInstance().getPlayerNoStore(info.getPartyLeader());
-            sender.sendMessage(ChatColor.WHITE + leader.getMembers().toString());
+            UUIDPlayerInfo leader = uSkyBlock.getInstance().getPlayerNoStore(info.getPartyLeader());
+            ArrayList<String> memberStrings = new ArrayList<String>();
+            for (UUID member : leader.getMembers())
+                memberStrings.add(Bukkit.getOfflinePlayer(member).getName());
+            sender.sendMessage(ChatColor.WHITE + memberStrings.toString());
         } 
         else if (sender instanceof Player && InviteHandler.hasInvite((Player)sender))
         {

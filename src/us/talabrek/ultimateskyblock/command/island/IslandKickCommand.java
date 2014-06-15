@@ -2,18 +2,15 @@ package us.talabrek.ultimateskyblock.command.island;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import us.talabrek.ultimateskyblock.ICommand;
-import us.talabrek.ultimateskyblock.Misc;
-import us.talabrek.ultimateskyblock.PlayerInfo;
-import us.talabrek.ultimateskyblock.Settings;
-import us.talabrek.ultimateskyblock.WorldGuardHandler;
-import us.talabrek.ultimateskyblock.uSkyBlock;
+import us.talabrek.ultimateskyblock.*;
 
 public class IslandKickCommand implements ICommand {
 
@@ -52,29 +49,30 @@ public class IslandKickCommand implements ICommand {
 		return false;
 	}
 
-	private void removePlayer(PlayerInfo player, PlayerInfo owner, CommandSender sender) {
-		Player onlinePlayer = player.getPlayer();
+	private void removePlayer(UUIDPlayerInfo player, UUIDPlayerInfo owner, CommandSender sender) {
+		OfflinePlayer offlinePlayer = player.getPlayer();
 
-		if (onlinePlayer != null) {
-			onlinePlayer.sendMessage(ChatColor.RED + "You have been kicked from " + owner.getPlayerName() + "'s skyblock.");
+		if (offlinePlayer instanceof Player) {
+            Player onlinePlayer = (Player)offlinePlayer;
+            onlinePlayer.sendMessage(ChatColor.RED + "You have been kicked from " + owner.getPlayer().getName() + "'s skyblock.");
 			if (uSkyBlock.isSkyBlockWorld(onlinePlayer.getWorld())) {
 
 				if (Settings.extras_sendToSpawn)
-					Misc.safeTeleport(onlinePlayer, Bukkit.getWorlds().get(0).getSpawnLocation());
+					Misc.safeTeleport(onlinePlayer, Bukkit.getWorld("spawnworld").getSpawnLocation());
 				else
 					Misc.safeTeleport(onlinePlayer, uSkyBlock.getSkyBlockWorld().getSpawnLocation());
 			}
 		}
 
-		sender.sendMessage(ChatColor.GREEN + player.getPlayerName() + " has been removed from the island.");
+		sender.sendMessage(ChatColor.GREEN + player.getPlayer().getName() + " has been removed from the island.");
 
 		player.setLeaveParty();
 		player.setHomeLocation(null);
 
-		owner.getMembers().remove(player.getPlayerName());
+		owner.getMembers().remove(player.getPlayerUUID());
 
 		if (Settings.island_protectWithWorldGuard && Bukkit.getPluginManager().isPluginEnabled("WorldGuard"))
-			WorldGuardHandler.removePlayerFromRegion(owner.getPlayerName(), player.getPlayerName());
+			WorldGuardHandler.removePlayerFromRegion(owner.getPlayer().getName(), player.getPlayer().getName());
 
 		player.save();
 	}
@@ -84,7 +82,7 @@ public class IslandKickCommand implements ICommand {
 		if (args.length != 1)
 			return false;
 
-		PlayerInfo info = uSkyBlock.getInstance().getPlayer(sender.getName());
+		UUIDPlayerInfo info = uSkyBlock.getInstance().getPlayer(((Player) sender).getUniqueId());
 
 		if (info == null) {
 			sender.sendMessage(ChatColor.RED + "You have not started skyblock. Please use " + ChatColor.YELLOW + "/island" + ChatColor.RED + " to begin");
@@ -96,14 +94,9 @@ public class IslandKickCommand implements ICommand {
 			return true;
 		}
 
-		if (!info.getPartyLeader().equals(sender.getName())) {
-			sender.sendMessage(ChatColor.RED + "You are not the party leader.");
-			return true;
-		}
-
 		boolean all = false;
 
-		PlayerInfo other = null;
+		UUIDPlayerInfo other = null;
 
 		if (args[0].equalsIgnoreCase("all"))
 			all = true;
@@ -114,22 +107,47 @@ public class IslandKickCommand implements ICommand {
 				return true;
 			}
 
-			if (other.getPlayerName().equals(sender.getName())) {
+			if (other.getPlayerUUID().equals(((Player)sender).getUniqueId())) {
 				sender.sendMessage(ChatColor.RED + "You cannot kick yourself.");
 				return true;
 			}
+<<<<<<< HEAD
 			
 			if (!other.getPartyLeader().equals(sender.getName())){
 				sender.sendMessage(ChatColor.RED + args[0] + " is not a member of your party!");
 				return true;
 			}
 			
+=======
+
+            if (other.getPlayer().getPlayer() != null &&
+                    uSkyBlock.isSkyBlockWorld(other.getPlayer().getPlayer().getWorld()) &&
+                    other.getPlayer().getPlayer().getLocation().distance(info.getIslandLocation()) < Settings.island_distance) {
+                // if player, regardless of party, is on the owner's island, send to spawn
+                if (Settings.extras_sendToSpawn)
+                    Misc.safeTeleport(other.getPlayer().getPlayer(), Bukkit.getWorld("spawnworld").getSpawnLocation());
+                else
+                    Misc.safeTeleport(other.getPlayer().getPlayer(), uSkyBlock.getSkyBlockWorld().getSpawnLocation());
+            }
+
+			// todo: check if other party leader exists
+			if (!other.getPartyLeader().equals(((Player)sender).getUniqueId())){
+				sender.sendMessage(ChatColor.RED + args[0] + " is not a member of your party!");
+				return true;
+			}
+
+>>>>>>> uSkyblock/master
 		}
 
+        if (!info.getPartyLeader().equals(((Player) sender).getUniqueId())) {
+            sender.sendMessage(ChatColor.RED + "You are not the party leader.");
+            return true;
+        }
+
 		if (all) {
-			ArrayList<String> members = new ArrayList<String>(info.getMembers());
-			for (String member : members) {
-				if (member.equals(sender.getName()))
+			ArrayList<UUID> members = new ArrayList<UUID>(info.getMembers());
+			for (UUID member : members) {
+				if (member.equals(((Player)sender).getUniqueId()))
 					continue;
 
 				other = uSkyBlock.getInstance().getPlayer(member);
@@ -139,7 +157,7 @@ public class IslandKickCommand implements ICommand {
 		} else
 			removePlayer(other, info, sender);
 
-		if (info.getMembers().isEmpty() || (info.getMembers().size() == 1 && info.getMembers().contains(info.getPlayerName())))
+		if (info.getMembers().isEmpty() || (info.getMembers().size() == 1 && info.getMembers().contains(info.getPlayerUUID())))
 			info.setLeaveParty();
 
 		info.save();
