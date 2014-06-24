@@ -71,9 +71,11 @@ public class uSkyBlock extends JavaPlugin {
 	HashMap<UUID, UUIDPlayerInfo> activePlayers = new HashMap<UUID, UUIDPlayerInfo>();
 	LinkedHashMap<String, List<String>> challenges = new LinkedHashMap<String, List<String>>();
 	public FileConfiguration configPlugin;
+	public FileConfiguration challengeConfig;
 	public File directoryPlayers;
 	private File directorySchematics;
 	public File filePlugin;
+	public File challengeList;
 	HashMap<UUID, Long> infoCooldown = new HashMap<UUID, Long>();
 	public Location islandTestLocation = null;
 	private Location lastIsland;
@@ -422,6 +424,7 @@ public class uSkyBlock extends JavaPlugin {
 			pi.buildChallengeList();
 			addActivePlayer(playerUUID, pi);
 			System.out.println("uSkyblock " + "Loaded player file for " + getPlayer(playerUUID).getPlayer().getName());
+    
 		}
 
 		return pi;
@@ -450,12 +453,34 @@ public class uSkyBlock extends JavaPlugin {
 		}
 	}
 
-	public FileConfiguration getChallengeConfig() {
-		// TODO create a challenge yml file and return it's fileconfiguration
-		// instead of the config.
-		// TODO move all challenge options from config to the challenge yml file
-		// and optionally rename them (as well as in source)
-		return getConfig();
+	public FileConfiguration loadChallengeConfig() {
+		try {
+			getConfig();
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
+
+		try {
+			Settings.challenges_rankLeeway = getChallengeConfig().getInt("options.challenges.rankLeeway");
+			if (Settings.challenges_rankLeeway < 0) {
+				Settings.challenges_rankLeeway = 0;
+			}
+		} catch (final Exception e) {
+			Settings.challenges_rankLeeway = 0;
+		}
+
+		final Set<String> challengeList = getChallengeConfig().getConfigurationSection("options.challenges.challengeList").getKeys(false);
+		Settings.challenges_challengeList = challengeList;
+		Settings.challenges_broadcastCompletion = getChallengeConfig().getBoolean("options.challenges.broadcastCompletion");
+		Settings.challenges_broadcastText = getChallengeConfig().getString("options.challenges.broadcastText");
+		Settings.challenges_challengeColor = getChallengeConfig().getString("options.challenges.challengeColor");
+		Settings.challenges_enableEconomyPlugin = getChallengeConfig().getBoolean("options.challenges.enableEconomyPlugin");
+		Settings.challenges_finishedColor = getChallengeConfig().getString("options.challenges.finishedColor");
+		Settings.challenges_repeatableColor = getChallengeConfig().getString("options.challenges.repeatableColor");
+		Settings.challenges_requirePreviousRank = getChallengeConfig().getBoolean("options.challenges.requirePreviousRank");
+		Settings.challenges_allowChallenges = getChallengeConfig().getBoolean("options.challenges.allowChallenges");
+		final String[] rankListString = getChallengeConfig().getString("options.challenges.ranks").split(" ");
+		Settings.challenges_ranks = rankListString;
 	}
 
 	public String getChallengesFromRank(final OfflinePlayer player, final String rank) {
@@ -927,14 +952,6 @@ public class uSkyBlock extends JavaPlugin {
 		} catch (final Exception e) {
 			Settings.island_height = 120;
 		}
-		try {
-			Settings.challenges_rankLeeway = getChallengeConfig().getInt("options.challenges.rankLeeway");
-			if (Settings.challenges_rankLeeway < 0) {
-				Settings.challenges_rankLeeway = 0;
-			}
-		} catch (final Exception e) {
-			Settings.island_height = 120;
-		}
 
 		if (!getConfig().contains("options.extras.obsidianToLava")) {
 			getConfig().set("options.extras.obsidianToLava", Boolean.valueOf(true));
@@ -967,20 +984,7 @@ public class uSkyBlock extends JavaPlugin {
 		Settings.island_removeCreaturesByTeleport = getConfig().getBoolean("options.island.removeCreaturesByTeleport");
 		Settings.island_allowIslandLock = getConfig().getBoolean("options.island.allowIslandLock");
 		Settings.island_useOldIslands = getConfig().getBoolean("options.island.useOldIslands");
-
-		final Set<String> challengeList = getChallengeConfig().getConfigurationSection("options.challenges.challengeList").getKeys(false);
-		Settings.challenges_challengeList = challengeList;
-		Settings.challenges_broadcastCompletion = getChallengeConfig().getBoolean("options.challenges.broadcastCompletion");
-		Settings.challenges_broadcastText = getChallengeConfig().getString("options.challenges.broadcastText");
-		Settings.challenges_challengeColor = getChallengeConfig().getString("options.challenges.challengeColor");
-		Settings.challenges_enableEconomyPlugin = getChallengeConfig().getBoolean("options.challenges.enableEconomyPlugin");
-		Settings.challenges_finishedColor = getChallengeConfig().getString("options.challenges.finishedColor");
-		Settings.challenges_repeatableColor = getChallengeConfig().getString("options.challenges.repeatableColor");
-		Settings.challenges_requirePreviousRank = getChallengeConfig().getBoolean("options.challenges.requirePreviousRank");
-		Settings.challenges_allowChallenges = getChallengeConfig().getBoolean("options.challenges.allowChallenges");
-		final String[] rankListString = getChallengeConfig().getString("options.challenges.ranks").split(" ");
-		Settings.challenges_ranks = rankListString;
-	}
+  }
 
 	public boolean locationIsOnIsland(final UUID playerUUID, final Location loc) {
 		if (isActivePlayer(playerUUID)) {
@@ -1043,6 +1047,11 @@ public class uSkyBlock extends JavaPlugin {
 		configPlugin = getConfig();
 		filePlugin = new File(getDataFolder(), "config.yml");
 		loadPluginConfig();
+
+/* Load challengeList.yml file */
+		challengeConfig = getConfig();
+		challengeList = new File(getDataFolder(), "challengeList.yml");
+		loadChallengeConfig();
 		registerEvents();
 
 		directoryPlayers = new File(getDataFolder(), "playerdata");
@@ -1097,6 +1106,7 @@ public class uSkyBlock extends JavaPlugin {
 		islandCommand.registerCommand(new IslandPartyCommand());
 
 		islandCommand.registerCommand(new IslandLevelCommand());
+		islandCommand.registerCommand(new IslandBiomeCommand());
 		islandCommand.registerCommand(new IslandRestartCommand());
 		islandCommand.registerCommand(new IslandSetHomeCommand());
 		islandCommand.registerCommand(new IslandSetWarpCommand());
@@ -1222,38 +1232,6 @@ public class uSkyBlock extends JavaPlugin {
 	}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	public boolean onInfoCooldown(final UUID playerUUID) {
 		if (infoCooldown.containsKey(playerUUID)) {
 			if (infoCooldown.get(playerUUID).longValue() > Calendar.getInstance().getTimeInMillis()) {
@@ -1325,12 +1303,68 @@ public class uSkyBlock extends JavaPlugin {
 
 		String UUIDString = playerUUID.toString();
 
-		final File f = new File(directoryPlayers, UUIDString);
+		final File f = new File(oldPlayerDirectory, playerName);
+		if (!f.exists()) {
+			return;
+		}
+		try {
+			final FileInputStream fileIn = new FileInputStream(f);
+			final ObjectInputStream in = new ObjectInputStream(fileIn);
+			final PlayerInfo p = (PlayerInfo) in.readObject();
+			in.close();
+			fileIn.close();
+			UUIDPlayerInfo p2 = new UUIDPlayerInfo(p);
+			writePlayerFile(playerUUID, p2);
+			f.delete();
+			return;
+		} catch (EOFException e) {
+			log.warning(playerName + " is corrupted.");
+			f.deleteOnExit();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		final File f = new File(directoryPlayers, UUIDString + ".yml");
 		if (!f.exists()) {
 			return null;
 		}
 		else {
-			try {
+      this.islands.put(location, YamlConfiguration.loadConfiguration(this.islandConfigFile));
+
+      try {
 				final FileInputStream fileIn = new FileInputStream(f);
 				final ObjectInputStream in = new ObjectInputStream(fileIn);
 				final UUIDPlayerInfo p = (UUIDPlayerInfo) in.readObject();
@@ -1575,7 +1609,7 @@ public class uSkyBlock extends JavaPlugin {
 		String UUIDString = playerUUID.toString();
         //System.out.println("Saving " + UUIDString);
 
-		final File f = new File(directoryPlayers, UUIDString);
+		final File f = new File(directoryPlayers, UUIDString + ".yml");
 		try {
 			final FileOutputStream fileOut = new FileOutputStream(f);
 			final ObjectOutputStream out = new ObjectOutputStream(fileOut);
@@ -1587,6 +1621,60 @@ public class uSkyBlock extends JavaPlugin {
 			e.printStackTrace();
 		}
 	}
+
+  public void savePlayerConfig(final UUID playerUUID, final UUIDPlayerInfo pi) {
+    String UUIDString = playerUUID.toString();
+
+    if (this.playerData == null)
+    {
+      System.out.println("Can't save player data!");
+      return;
+    }
+    getPlayerConfig(player).set("player.hasIsland", Boolean.valueOf(getHasIsland()));
+    if (getIslandLocation() != null)
+    {
+      getPlayerConfig(player).set("player.islandX", Integer.valueOf(getIslandLocation().getBlockX()));
+      getPlayerConfig(player).set("player.islandY", Integer.valueOf(getIslandLocation().getBlockY()));
+      getPlayerConfig(player).set("player.islandZ", Integer.valueOf(getIslandLocation().getBlockZ()));
+    }
+    else
+    {
+      getPlayerConfig(player).set("player.islandX", Integer.valueOf(0));
+      getPlayerConfig(player).set("player.islandY", Integer.valueOf(0));
+      getPlayerConfig(player).set("player.islandZ", Integer.valueOf(0));
+    }
+    if (getHomeLocation() != null)
+    {
+      getPlayerConfig(player).set("player.homeX", Integer.valueOf(getHomeLocation().getBlockX()));
+      getPlayerConfig(player).set("player.homeY", Integer.valueOf(getHomeLocation().getBlockY()));
+      getPlayerConfig(player).set("player.homeZ", Integer.valueOf(getHomeLocation().getBlockZ()));
+    }
+    else
+    {
+      getPlayerConfig(player).set("player.homeX", Integer.valueOf(0));
+      getPlayerConfig(player).set("player.homeY", Integer.valueOf(0));
+      getPlayerConfig(player).set("player.homeZ", Integer.valueOf(0));
+    }
+    Iterator<String> ent = this.challengeListNew.keySet().iterator();
+    String currentChallenge = "";
+    while (ent.hasNext())
+    {
+      currentChallenge = (String)ent.next();
+      getPlayerConfig(player).set("player.challenges." + currentChallenge + ".firstCompleted", Long.valueOf(((Challenge)this.challengeListNew.get(currentChallenge)).getFirstCompleted()));
+      getPlayerConfig(player).set("player.challenges." + currentChallenge + ".timesCompleted", Integer.valueOf(((Challenge)this.challengeListNew.get(currentChallenge)).getTimesCompleted()));
+      getPlayerConfig(player).set("player.challenges." + currentChallenge + ".timesCompletedSinceTimer", Integer.valueOf(((Challenge)this.challengeListNew.get(currentChallenge)).getTimesCompletedSinceTimer()));
+    }
+    this.playerConfigFile = new File(uSkyBlock.getInstance().directoryPlayers, player + ".yml");
+    try
+    {
+      getPlayerConfig(player).save(this.playerConfigFile);
+      System.out.println("Player data saved!");
+    }
+    catch (IOException ex)
+    {
+      uSkyBlock.getInstance().getLogger().log(Level.SEVERE, "Could not save config to " + this.playerConfigFile, ex);
+    }
+  }
 
 	public void removeIsland(UUIDPlayerInfo island) {
 		ArrayList<UUIDPlayerInfo> list = new ArrayList<UUIDPlayerInfo>(1);

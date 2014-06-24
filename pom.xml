@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>uSkyBlock</groupId>
-	<artifactId>uSkyBlock</artifactId>
-	<version>1.1</version>
-	<name>Ultimate Skyblock</name>
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>us.talabrek.ultimateskyblock</groupId>
+  <artifactId>uSkyBlock</artifactId>
+  <version>2.1.0</version>
+  <name>Ultimate Skyblock</name>
   <repositories>
     <repository> <!-- Bukkit repository -->
       <id>bukkit-repo</id>
@@ -22,7 +22,7 @@
       <url>http://maven.addstar.com.au/artifactory/ext-release-local/</url>
     </repository>
   </repositories>
-	<build>
+  <build>
     <finalName>uSkyBlock</finalName>
     <resources>
       <resource>
@@ -49,8 +49,8 @@
         </configuration>
       </plugin>
     </plugins>
-	</build>
-	<dependencies>
+  </build>
+  <dependencies>
     <dependency> <!-- Bukkit implementation -->
       <groupId>org.bukkit</groupId>
       <artifactId>bukkit</artifactId>
@@ -79,5 +79,5 @@
       <scope>compile</scope>
       <type>jar</type>
     </dependency>
-	</dependencies>
+  </dependencies>
 </project>
