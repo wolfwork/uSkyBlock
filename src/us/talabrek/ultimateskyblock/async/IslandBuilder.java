@@ -97,7 +97,7 @@ public class IslandBuilder implements Runnable
 		inventory.setContents(Settings.island_chestItems);
 		if (Settings.island_addExtraItems) {
 			for (final String island_extraPermission : Settings.island_extraPermissions) {
-				if (VaultHandler.checkPerk(player, "usb." + island_extraPermission, player.getWorld())) {
+				if (VaultHandler.checkPerk(player.getName(), "usb." + island_extraPermission, player.getWorld())) {
 					final String[] chestItemString = uSkyBlock.getInstance().getConfig().getString("options.island.extraPermissions." + island_extraPermission).split(" ");
 					final ItemStack[] tempChest = new ItemStack[chestItemString.length];
 					String[] amountdata = new String[2];
@@ -260,7 +260,7 @@ public class IslandBuilder implements Runnable
 		inventory.setContents(Settings.island_chestItems);
 		if (Settings.island_addExtraItems) {
 			for (final String island_extraPermission : Settings.island_extraPermissions) {
-				if (VaultHandler.checkPerk(player, "usb." + island_extraPermission, player.getWorld())) {
+				if (VaultHandler.checkPerk(player.getName(), "usb." + island_extraPermission, player.getWorld())) {
 					final String[] chestItemString = uSkyBlock.getInstance().getConfig().getString("options.island.extraPermissions." + island_extraPermission).split(" ");
 					final ItemStack[] tempChest = new ItemStack[chestItemString.length];
 					String[] amountdata = new String[2];
@@ -419,6 +419,13 @@ public class IslandBuilder implements Runnable
 		uSkyBlock.getInstance().getPlayer(player.getUniqueId()).setIslandLocation(loc);
 
 		player.teleport(getChestSpawnLoc(loc, player));
+    player.getInventory().clear();
+    player.getEquipment().clear();
+    if(!VaultHandler.checkPerk(player.getName(), "usb.extra.keepchest", player.getWorld()))
+    {
+      player.getEnderChest().clear();
+      player.chat("/clearchest");
+    }
 		uSkyBlock.getInstance().homeSet(player);
 		uSkyBlock.getInstance().savePlayer(uSkyBlock.getInstance().getPlayer(player.getUniqueId()));
 	}
@@ -460,7 +467,7 @@ public class IslandBuilder implements Runnable
 						inventory.setContents(Settings.island_chestItems);
 						if (Settings.island_addExtraItems) {
 							for (final String island_extraPermission : Settings.island_extraPermissions) {
-								if (VaultHandler.checkPerk(player, "usb." + island_extraPermission, player.getWorld())) {
+								if (VaultHandler.checkPerk(player.getName(), "usb." + island_extraPermission, player.getWorld())) {
 									final String[] chestItemString = uSkyBlock.getInstance().getConfig().getString("options.island.extraPermissions." + island_extraPermission).split(" ");
 									final ItemStack[] tempChest = new ItemStack[chestItemString.length];
 									String[] amountdata = new String[2];

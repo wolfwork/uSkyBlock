@@ -11,8 +11,7 @@ public class PartyListBuilder implements Runnable
 	private final File mDir;
 	
 	
-	public PartyListBuilder()
-	{
+	public PartyListBuilder()	{
 		mDir = uSkyBlock.getInstance().directoryPlayers;
 	}
 	@Override
@@ -20,25 +19,24 @@ public class PartyListBuilder implements Runnable
 	{
 		uSkyBlock.getLog().info("Building a new party list...");
 		
-		for(File file : mDir.listFiles())
-		{
+		for(File file : mDir.listFiles()) {
 			UUIDPlayerInfo info = uSkyBlock.getInstance().getPlayer(UUID.fromString(file.getName()));
 			if(info == null)
 				continue;
 			
-			if (info.getHasParty()) 
-			{
+			if (info.getHasParty()) {
 				UUIDPlayerInfo leaderInfo;
-				if (!info.getPartyLeader().equals(UUID.fromString(file.getName())))
+				if (!info.getPartyLeader().equals(UUID.fromString(file.getName()))) {
 					leaderInfo = uSkyBlock.getInstance().getPlayer(info.getPartyLeader());
-				else
+        }
+        else {
 					leaderInfo = info;
-				
+        }
 				leaderInfo.getHasParty();
 
-				if (!leaderInfo.getMembers().contains(file.getName()))
+				if (!leaderInfo.getMembers().contains(file.getName())) {
 					leaderInfo.addMember(UUID.fromString(file.getName()));
-
+        }
 				uSkyBlock.getInstance().savePlayer(leaderInfo);
 			}
 		}

@@ -124,7 +124,13 @@ public class InviteHandler {
 
 			return;
 		}
-
+    player.getInventory().clear();
+    player.getEquipment().clear();
+    if(!VaultHandler.checkPerk(player.getName(), "usb.extra.keepchest", player.getWorld()))
+    {
+        player.getEnderChest().clear();
+        player.chat("/clearchest");
+    }
 		if (Settings.island_protectWithWorldGuard && Bukkit.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
 			if (WorldGuardHandler.getWorldGuard().getRegionManager(uSkyBlock.getSkyBlockWorld()).hasRegion(invite.from.getName() + "Island"))
 				WorldGuardHandler.addPlayerToOldRegion(invite.from.getName(), player.getName());
@@ -136,10 +142,6 @@ public class InviteHandler {
 		UUIDPlayerInfo info = uSkyBlock.getInstance().getOrCreatePlayer(player.getUniqueId());
 
 		if (info.getHasParty() && info.getPartyLeader().equals(invite.from.getUniqueId())) {
-			info.setLeaveParty();
-		}
-
-		if (info.getHasParty() && info.getPartyLeader() == invite.from.getName()) {
 			info.setLeaveParty();
 		}
 
@@ -240,15 +242,6 @@ public class InviteHandler {
 
 		player.setJoinParty(partyLeader.getPlayerUUID(), partyLeader.getIslandLocation());
 
-<<<<<<< HEAD
-		if (!partyLeader.getHasParty()){
-			partyLeader.setJoinParty(partyLeader.getPlayerName(), partyLeader.getIslandLocation());
-		}
-
-		player.setJoinParty(partyLeader.getPlayerName(), partyLeader.getIslandLocation());
-
-=======
->>>>>>> uSkyblock/master
 		if (partyLeader.getHomeLocation() != null)
 			player.setHomeLocation(partyLeader.getHomeLocation());
 		else

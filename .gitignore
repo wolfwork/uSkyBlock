@@ -1,6 +1,4 @@
 *.class
-.settings
-.classpath
 bin
 
 # Package Files #
@@ -9,5 +7,3 @@ bin
 *.ear
 /target
 /lib
-/.classpath
-/.project
