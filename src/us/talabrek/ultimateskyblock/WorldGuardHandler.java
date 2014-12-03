@@ -1,5 +1,6 @@
 package us.talabrek.ultimateskyblock;
 
+import com.sk89q.worldguard.protection.managers.storage.StorageException;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
@@ -10,7 +11,6 @@ import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
-import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.managers.RegionManager;
@@ -129,7 +129,7 @@ public class WorldGuardHandler {
 			uSkyBlock.getLog().info("New protected region created for " + pi.getPlayer().getName() + "'s Island");
 			manager.save();
 		} 
-		catch (ProtectionDatabaseException e) 
+		catch (StorageException e)
 		{
 			e.printStackTrace();
 			throw new IllegalStateException("Unable to save regions", e);
@@ -159,7 +159,7 @@ public class WorldGuardHandler {
 		{
 			RegionManager manager = getWorldGuard().getRegionManager(uSkyBlock.getSkyBlockWorld());
 			
-			ProtectedRegion original = manager.getRegionExact(owner + "Island");
+			ProtectedRegion original = manager.getRegion(owner + "Island");
 			
 			ProtectedRegion region2 = null;
 			region2 = new ProtectedCuboidRegion(player + "Island", original.getMinimumPoint(), original.getMaximumPoint());
