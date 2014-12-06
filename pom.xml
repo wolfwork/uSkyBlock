@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>us.talabrek.ultimateskyblock</groupId>
   <artifactId>uSkyBlock</artifactId>
-  <version>2.1.0</version>
+  <version>2.1.0-SNAPSHOT</version>
   <name>Ultimate Skyblock</name>
   <repositories>
     <repository> <!-- Bukkit repository -->
@@ -16,6 +16,11 @@
     <repository> <!-- sk89q' WorldEdit and WorldGuard repository -->
       <id>sk89q-repo</id>
       <url>http://maven.sk89q.com/repo/</url>
+    </repository>
+    <repository>
+      <id>sk89q-repo-snapshots</id>
+      <url>http://maven.sk89q.com/artifactory/libs-snapshot-local</url>
+      <snapshots></snapshots>
     </repository>
     <repository> <!-- Vault repository -->
       <id>addstar-repo</id>
@@ -65,14 +70,14 @@
     <dependency> <!-- WorldEdit implementation -->
       <groupId>com.sk89q</groupId>
       <artifactId>worldedit</artifactId>
-      <version>LATEST</version>
+      <version>6.0.0-SNAPSHOT</version>
       <scope>compile</scope>
       <type>jar</type>
     </dependency>
     <dependency> <!-- WorldGuard implementation -->
       <groupId>com.sk89q</groupId>
       <artifactId>worldguard</artifactId>
-      <version>LATEST</version>
+      <version>6.0.0-SNAPSHOT</version>
       <scope>compile</scope>
       <type>jar</type>
     </dependency>
