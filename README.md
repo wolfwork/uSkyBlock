@@ -1,4 +1,4 @@
 uSkyBlock
 =========
 
-Talabrek's Ultimate SkyBlock continually updated.
+Ultimate SkyBlock Plugin.
